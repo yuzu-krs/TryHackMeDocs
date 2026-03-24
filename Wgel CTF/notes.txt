@@ -25,6 +25,7 @@ sudo -l
 
 
 rootしか読めないファイルをroot権限のwgetで外部に送る
+
 nc -lvnp 4444
 nc:netcat
 -l:listen(接続を待ち受ける)

