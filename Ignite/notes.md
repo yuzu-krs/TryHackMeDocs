@@ -12,6 +12,7 @@ nmap -sV -oN nmap.log 10.48.149.92
 ```
 
 **結果:**
+
 - ポート80が開いている → Apache Web サーバーが稼働
 - **Fuel CMS 1.4** が動作していることを確認
 
@@ -134,6 +135,7 @@ cat /var/www/html/fuel/application/config/database.php
 ```
 
 **発見した認証情報:**
+
 - username: `root`
 - password: **`mememe`**
 
@@ -164,9 +166,9 @@ cat /root/root.txt
 
 ## まとめ
 
-| ステップ | 手法 | ポイント |
-|---|---|---|
-| 偵察 | nmap ポートスキャン | Fuel CMS 1.4 を発見 |
-| 初期アクセス | Exploit-DB 50477 (RCE) | Fuel CMS の既知脆弱性を利用 |
-| シェル確立 | リバースシェル (PHP/Bash/nc) | 攻撃マシンの IP を指定する |
-| 権限昇格 | DB 設定ファイルのパスワード再利用 | `database.php` → `mememe` → `su root` |
+| ステップ     | 手法                              | ポイント                              |
+| ------------ | --------------------------------- | ------------------------------------- |
+| 偵察         | nmap ポートスキャン               | Fuel CMS 1.4 を発見                   |
+| 初期アクセス | Exploit-DB 50477 (RCE)            | Fuel CMS の既知脆弱性を利用           |
+| シェル確立   | リバースシェル (PHP/Bash/nc)      | 攻撃マシンの IP を指定する            |
+| 権限昇格     | DB 設定ファイルのパスワード再利用 | `database.php` → `mememe` → `su root` |
